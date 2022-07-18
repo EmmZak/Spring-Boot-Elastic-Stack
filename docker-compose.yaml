@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  db:
+  postgres:
     image: postgres:13-alpine
-    container_name: postgres-docker
+    container_name: postgres
     ports: 
       - 5432:5432
     volumes:
@@ -13,8 +13,10 @@ services:
         - POSTGRES_PASSWORD=postgres
         - POSTGRES_DB=library
         - POSTGRES_HOST=pg_host
-  
-  elastic:
+    networks:
+      - elk
+
+  elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.0
     container_name: es01
     environment:
@@ -22,11 +24,50 @@ services:
       - discovery.type=single-node
       - cluster.name=docker-cluster
       - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=true
     ports:
       - 9200:9200
       - 9300:9300
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
+    networks:
+      - elk
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.3.0
+    container_name: logstash
+    command: bin/logstash -f /usr/share/logstash/config/logstash.conf
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/config/logstash.conf
+      - ./driver/postgresql-42.4.0.jar:/usr/share/logstash/config/driver/postgresql-42.4.0.jar
+      #- ./logs:/logs
+      #- ./logstash.conf:/usr/share/logstash/config/logstash.conf
+      #- ./driver:/usr/share/logstash/config
+      #- ./driver/postgresql-42.4.0.jar:/driver/postgresql-42.4.0.jar
+    ports:
+      - 5044:5044
+      #- 5000:5000/tcp
+      #- 5000:5000/udp
+      - 9600:9600
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk
+  
+  # token
+  # docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.3.0
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_URL: "http://localhost:9300/"
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk
+
   # pgadmin:
   #     container_name: pgadmin4_container
   #     image: dpage/pgadmin4
@@ -40,3 +81,6 @@ services:
 volumes:
   pgdata:
   elastic_data:
+
+networks:
+  elk:

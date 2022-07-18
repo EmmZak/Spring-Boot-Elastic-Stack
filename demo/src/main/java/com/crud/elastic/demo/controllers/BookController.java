@@ -19,7 +19,7 @@ import com.crud.elastic.demo.repository.BookRepository;
 @RestController
 public class BookController {
 
-    private org.slf4j.Logger logger = LoggerFactory.getLogger(BookController.class);
+    private Logger logger = LoggerFactory.getLogger(BookController.class);
 
     @Autowired
     private BookRepository bookRepository;
@@ -32,16 +32,19 @@ public class BookController {
         return "ping ok";
     }
 
-    // @GetMapping(path = "/")
-    // public List<Book> findAll() {
-    //     logger.info("find all called");
-    //     return (List<Book>) bookRepository.findAll();
-    // }
+    @GetMapping(path = "/")
+    public List<Book> findAll() {
+        logger.info("find all called");
+        return (List<Book>) bookRepository.findAll();
+    }
 
     @GetMapping(path = "/elastic/")
-    public List<Book> findAllElastic() {
-        
-        return (List<Book>) bookElasticRepository.findAll();
+    public Iterable<Book> findAllElastic() {
+        Iterable<Book> objects = bookElasticRepository.findAll();
+
+        logger.info("elastic findAll " + objects);
+
+        return bookElasticRepository.findAll();
     }
 
     @GetMapping(path = "/{id}")
