@@ -21,9 +21,9 @@ public class Config {
  
         return RestClients.create(clientConfiguration).rest();
     }
-    /* 
+    
     @Bean
     public ElasticsearchOperations elasticsearchTemplate() {
         return new ElasticsearchRestTemplate(client());
-    } */
+    } 
 }  

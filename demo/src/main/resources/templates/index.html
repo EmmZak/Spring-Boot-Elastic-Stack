@@ -1,0 +1,35 @@
+<header>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</header>
+
+<div id="app">
+
+    <input type="text">
+
+    <div v-for="(book, i) in books">
+        {{ book }}
+    </div>
+
+</div>
+
+<script>
+const app = new Vue({
+    el: "#app",
+    delimiters: ['{{', '}}'],
+    data() {
+        return {
+            books: []
+        }
+    },
+    async mounted() {
+        fetch("http://localhost:8080/books/")
+            .then(response => response.json())
+            .then(data => {
+                console.log("data", data)
+                this.books = data
+            })
+            .catch(err => console.log("err", err))
+    }
+})
+</script>
