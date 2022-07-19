@@ -4,8 +4,17 @@
 </header>
 
 <div id="app">
+    
+    <div class="match">
+        <label for="match">Match</label>
+        <input v-model="matchText" @input="load_match" name="match" id="match" type="text">
+    </div>
 
-    <input type="text">
+    <div class="contain">
+        <label for="contain">Contain</label>
+        <input v-model="containText" @input="load_contain" name="contain" id="contain" type="text">
+    </div>
+
 
     <div v-for="(book, i) in books">
         {{ book }}
@@ -19,17 +28,56 @@ const app = new Vue({
     delimiters: ['{{', '}}'],
     data() {
         return {
+            matchText: "",
+            containText: "",
             books: []
         }
     },
     async mounted() {
-        fetch("http://localhost:8080/books/")
+        this.load_all()
+    },
+    methods: {
+        load_all() {
+            fetch("http://localhost:8080/books/")
             .then(response => response.json())
             .then(data => {
                 console.log("data", data)
                 this.books = data
             })
             .catch(err => console.log("err", err))
-    }
+        },
+        load_match(e) {
+            this.containText = ""
+
+            if (this.matchText == "") {
+                this.load_all()
+                return
+            }
+
+            fetch(`http://localhost:8080/books/elastic/match/${this.matchText}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log("data", data)
+                this.books = data
+            })
+            .catch(err => console.log("err", err))
+        },
+        load_contain(e) {
+            this.matchText = ""
+
+            if (this.containText == "") {
+                this.load_all()
+                return
+            }
+
+            fetch(`http://localhost:8080/books/elastic/contain/${this.containText}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log("data", data)
+                this.books = data
+            })
+            .catch(err => console.log("err", err))
+        }
+    },
 })
 </script>

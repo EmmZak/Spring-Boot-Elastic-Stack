@@ -40,60 +40,9 @@ public class BookController {
     @Autowired
     private  ElasticsearchOperations elasticsearchOperations;
     
-    @GetMapping(path = "/ping")
-    public String ping() {
-        return "ping ok";
-    }
-
     @GetMapping(path = "/books")
     public List<Book> findAll() {
         return (List<Book>) bookRepository.findAll();
     }
 
-    @GetMapping(path = "/books/elastic")
-    public Iterable<Book> findAllElastic(@RequestParam(name="text", required=false) String text) {
-        if (text == null) {
-            return bookElasticRepository.findAll();
-        }
-        System.out.println("param is " + text);
-
-        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-            .withQuery(QueryBuilders.multiMatchQuery(text)
-                .field("title")
-                .field("category")
-                .type(MultiMatchQueryBuilder.Type.MOST_FIELDS))
-            .build();
-
-        NativeSearchQuery searchQuery2 = new NativeSearchQueryBuilder()
-            .withQuery(QueryBuilders.multiMatchQuery(text)
-                .field("title")
-                .field("category")
-                .type(MultiMatchQueryBuilder.Type.MOST_FIELDS))
-            .build();
-        // Query q = new NativeSearchQueryBuilder()
-        //     .withFilter(QueryBuilders.matchQuery("title", title))
-        //     .build();
-
-        SearchHits<Book> hits = elasticsearchOperations.search(searchQuery, Book.class);
-        System.out.println(hits.getSearchHits());
-
-        List<Book> books = new ArrayList<Book>();
-
-        hits.forEach(e -> 
-            books.add(e.getContent())
-        );
-
-        return books;
-    }
-
-    // @GetMapping(path = "/{id}")
-    // public Optional<Book> findOne(@PathVariable Long id) {
-    //     return bookRepository.findById(id);
-    // }
-
-    // @PostMapping(path = "/")
-    // public Book createBook(@RequestBody Book book) {
-    //     logger.info("Book added " + book);
-    //     return bookRepository.save(book);
-    // }
 }
