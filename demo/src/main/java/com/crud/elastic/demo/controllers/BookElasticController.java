@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +36,12 @@ public class BookElasticController {
     public Iterable<Book> findAllMatchs(@PathVariable(name="text", required=true) String text) {
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-            .withQuery(QueryBuilders.multiMatchQuery(text)
-                .field("title")
-                .field("category")
-                .type(MultiMatchQueryBuilder.Type.MOST_FIELDS))
+            .withQuery(
+                QueryBuilders.multiMatchQuery(text)
+                    .field("title")
+                    .field("category")
+                    .type(MultiMatchQueryBuilder.Type.MOST_FIELDS)
+                )
             .build();
 
         SearchHits<Book> hits = elasticsearchOperations.search(searchQuery, Book.class);
@@ -57,7 +60,9 @@ public class BookElasticController {
     public Iterable<Book> findAllContain(@PathVariable(name="text", required=true) String text) {
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-            .withFilter(QueryBuilders.regexpQuery("title", ".*" + text + ".*"))
+            .withFilter(
+                QueryBuilders.regexpQuery("title", ".*" + text + ".*")
+            )
             .build();
 
         SearchHits<Book> hits = elasticsearchOperations.search(searchQuery, Book.class);

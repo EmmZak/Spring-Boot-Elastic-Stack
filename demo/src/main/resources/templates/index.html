@@ -4,7 +4,7 @@
 </header>
 
 <div id="app">
-    
+
     <div class="match">
         <label for="match">Match</label>
         <input v-model="matchText" @input="load_match" name="match" id="match" type="text">
@@ -15,69 +15,138 @@
         <input v-model="containText" @input="load_contain" name="contain" id="contain" type="text">
     </div>
 
+    {{ book }}
+
+    <div class="create_book">
+        <form @submit="createBook" method="post" action="">
+            <label for="title">Title</label>
+            <input v-model="book.title" name="title" type="text">
+    
+            <label for="category">Category</label>
+            <input v-model="book.category" name="category" type="text">
+    
+            <input type="submit">
+        </form>
+    </div>
 
     <div v-for="(book, i) in books">
-        {{ book }}
+        <div>
+            {{ book }}
+            <button @click="removeBook(book.id)">Remove</button>
+        </div>
     </div>
 
 </div>
 
 <script>
-const app = new Vue({
-    el: "#app",
-    delimiters: ['{{', '}}'],
-    data() {
-        return {
-            matchText: "",
-            containText: "",
-            books: []
-        }
-    },
-    async mounted() {
-        this.load_all()
-    },
-    methods: {
-        load_all() {
-            fetch("http://localhost:8080/books/")
-            .then(response => response.json())
-            .then(data => {
-                console.log("data", data)
-                this.books = data
-            })
-            .catch(err => console.log("err", err))
-        },
-        load_match(e) {
-            this.containText = ""
-
-            if (this.matchText == "") {
-                this.load_all()
-                return
+    const app = new Vue({
+        el: "#app",
+        delimiters: ['{{', '}}'],
+        data() {
+            return {
+                matchText: "",
+                containText: "",
+                books: [
+                    {id: "1", title: "manu", category: "category"},
+                    {id: "2", title: "manu", category: "category"},
+                    {id: "3", title: "manu", category: "category"},
+                    {id: "4", title: "manu", category: "category"},
+                    {id: "5", title: "manu", category: "category"}
+                ],
+                book: {
+                    title: "",
+                    category: ""
+                }
             }
-
-            fetch(`http://localhost:8080/books/elastic/match/${this.matchText}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log("data", data)
-                this.books = data
-            })
-            .catch(err => console.log("err", err))
         },
-        load_contain(e) {
-            this.matchText = ""
+        async mounted() {
+            this.load_all()
+        },
+        methods: {
+            load_all() {
+                fetch("http://localhost:8080/books/")
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("data", data)
+                        this.books = data
+                    })
+                    .catch(err => console.log("err", err))
+            },
+            load_match(e) {
+                this.containText = ""
 
-            if (this.containText == "") {
-                this.load_all()
-                return
+                if (this.matchText == "") {
+                    this.load_all()
+                    return
+                }
+
+                fetch(`http://localhost:8080/books/elastic/match/${this.matchText}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("data", data)
+                        this.books = data
+                    })
+                    .catch(err => console.log("err", err))
+            },
+            load_contain(e) {
+                this.matchText = ""
+
+                if (this.containText == "") {
+                    this.load_all()
+                    return
+                }
+
+                fetch(`http://localhost:8080/books/elastic/contain/${this.containText}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("data", data)
+                        this.books = data
+                    })
+                    .catch(err => console.log("err", err))
+            },
+            clear(){
+                this.book.title = ""
+                this.book.category = ""
+            },
+            async createBook(e) {
+                e.preventDefault();
+
+                if (this.book.title == "" || this.book.category == "") {
+                    console.log("form not valid")
+                    return
+                }
+
+                let options = {
+                    method: "POST",
+                    headers: {
+                        "content-type": "application/json"
+                    },
+                    body: JSON.stringify(this.book)
+                }
+                console.log("options ", options)
+                await fetch(`http://localhost:8080/books`, options)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("created book", data)
+                        //this.books = data
+                        this.load_all()
+                    })
+                    .catch(err => console.log("err", err))
+                this.clear()
+            },
+            async removeBook(id) {
+                let options = {
+                    method: "DELETE"
+                }
+                await fetch(`http://localhost:8080/books/${id}`, options)
+                    .then(data => {
+                        console.log("removed book", data)
+                        this.load_all()
+                    })
+                    .catch(err => console.log("err", err))
+                
+                    this.clear()
             }
-
-            fetch(`http://localhost:8080/books/elastic/contain/${this.containText}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log("data", data)
-                this.books = data
-            })
-            .catch(err => console.log("err", err))
-        }
-    },
-})
+        },
+    })
 </script>

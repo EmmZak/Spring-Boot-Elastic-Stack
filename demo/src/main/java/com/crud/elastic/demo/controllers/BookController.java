@@ -15,6 +15,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,16 +34,19 @@ public class BookController {
 
     @Autowired
     private BookRepository bookRepository;
-
-    @Autowired
-    private BookElasticRepository bookElasticRepository;
-
-    @Autowired
-    private  ElasticsearchOperations elasticsearchOperations;
     
     @GetMapping(path = "/books")
     public List<Book> findAll() {
         return (List<Book>) bookRepository.findAll();
     }
 
+    @PostMapping(path = "/books")
+    public Book create(@RequestBody(required = true) Book book) {
+        return bookRepository.save(book);
+    }
+
+    @DeleteMapping(path = "/books/{id}")
+    public void delete(@PathVariable(required = true) Long id ) {
+        bookRepository.deleteById(id);
+    }
 }
