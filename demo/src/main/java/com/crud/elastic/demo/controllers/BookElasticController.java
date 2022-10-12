@@ -2,6 +2,7 @@ package com.crud.elastic.demo.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -47,13 +48,10 @@ public class BookElasticController {
         SearchHits<Book> hits = elasticsearchOperations.search(searchQuery, Book.class);
         System.out.println(hits.getSearchHits());
 
-        List<Book> books = new ArrayList<Book>();
-
-        hits.forEach(e -> 
-            books.add(e.getContent())
-        );
-
-        return books;
+        return hits
+            .stream()
+            .map(hit -> hit.getContent())
+            .collect(Collectors.toList());
     }
 
     @GetMapping(path = "/books/elastic/contain/{text}")
@@ -63,17 +61,17 @@ public class BookElasticController {
             .withFilter(
                 QueryBuilders.regexpQuery("title", ".*" + text + ".*")
             )
+            .withFilter(
+                QueryBuilders.regexpQuery("category", ".*" + text + ".*")
+            )
             .build();
 
         SearchHits<Book> hits = elasticsearchOperations.search(searchQuery, Book.class);
         System.out.println(hits.getSearchHits());
 
-        List<Book> books = new ArrayList<Book>();
-
-        hits.forEach(e -> 
-            books.add(e.getContent())
-        );
-
-        return books;
+        return hits
+            .stream()
+            .map(hit -> hit.getContent())
+            .collect(Collectors.toList());
     }
 }
