@@ -5,18 +5,6 @@
 
 <div id="app">
 
-    <div class="match">
-        <label for="match">Match</label>
-        <input v-model="matchText" @input="load_match" name="match" id="match" type="text">
-    </div>
-
-    <div class="contain">
-        <label for="contain">Contain</label>
-        <input v-model="containText" @input="load_contain" name="contain" id="contain" type="text">
-    </div>
-
-    {{ book }}
-
     <div class="create_book">
         <form @submit="createBook" method="post" action="">
             <label for="title">Title</label>
@@ -29,9 +17,24 @@
         </form>
     </div>
 
+    <div style="display: flex; justify-content: space-around;">
+        <div class="match">
+            <label for="match">Match</label>
+            <input v-model="matchText" @input="load_match" name="match" id="match" type="text">
+        </div>
+    
+        <div class="contain">
+            <label for="contain">Contain</label>
+            <input v-model="containText" @input="load_contain" name="contain" id="contain" type="text">
+        </div>
+    </div>
+
     <div v-for="(book, i) in books">
-        <div>
-            {{ book }}
+        <div style="display: flex; justify-content: space-between; padding: 2px;">
+            <div style="border: 2px solid;">
+                <div>Title: {{ book.title }} - {{ book.id }} </div>
+                <div>Category: {{ book.category }} </div>
+            </div>
             <button @click="removeBook(book.id)">Remove</button>
         </div>
     </div>
@@ -60,6 +63,7 @@
             }
         },
         async mounted() {
+            this.clear()
             this.load_all()
         },
         methods: {
