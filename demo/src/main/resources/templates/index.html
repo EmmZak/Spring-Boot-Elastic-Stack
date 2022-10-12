@@ -29,15 +29,18 @@
         </div>
     </div>
 
-    <div v-for="(book, i) in books">
-        <div style="display: flex; justify-content: space-between; padding: 2px;">
-            <div style="border: 2px solid;">
-                <div>Title: {{ book.title }} - {{ book.id }} </div>
-                <div>Category: {{ book.category }} </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); padding-top: 10px;">
+        <div v-for="(book, i) in books" style="border: 1px solid; padding: 5px;">
+            <div style="display: flex; justify-content: space-between; padding: 2px;">
+                <div style="border: 2px solid;">
+                    <div>Title: {{ book.title }} - {{ book.id }} </div>
+                    <div>Category: {{ book.category }} </div>
+                </div>
+                <button @click="removeBook(book.id)">Remove</button>
             </div>
-            <button @click="removeBook(book.id)">Remove</button>
         </div>
     </div>
+
 
 </div>
 
